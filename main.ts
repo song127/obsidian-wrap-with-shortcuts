@@ -63,12 +63,19 @@ export default class WrapWithShortcut extends Plugin {
       }
     }
 
-    /* Detect whether the selected text is packed by <u></u>.
-       If true, unpack it, else pack with <u></u>. */
-
     const fos = editor.posToOffset(editor.getCursor("from")); // from offset
     const tos = editor.posToOffset(editor.getCursor("to")); // to offset
-    const len = selectedText.length;
+    let len = selectedText.length;
+
+    // 선택된 텍스트가 없는 경우, 커서 주변의 단어를 선택
+    if (!selectedText) {
+      const wordRange = editor.wordAtPos(editor.getCursor());
+      if (wordRange) {
+        editor.setSelection(wordRange.anchor, wordRange.head);
+        selectedText = editor.getSelection();
+        len = selectedText.length;
+      }
+    }
 
     const beforeText = getRange(editor, fos - startTag.length, tos - len);
     const afterText = getRange(editor, fos + len, tos + endTag.length);
